@@ -1,70 +1,135 @@
-# Getting Started with Create React App
+# AI-Code-Reviewer-Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A frontend application for **AI-powered Code Review** that lets users submit code and receive automatic review feedback. Built with **React** and **Tailwind CSS**, this UI works with an AI Code Reviewer backend to display results, manage reviews, and provide an interactive developer experience.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+* Responsive UI built with **React**
+* Code submission interface with syntax highlighting
+* Displays AI-generated code review results
+* History of past reviews (if backend supports it)
+* Tailwind CSS for modern styling
+* Connects to a backend AI Code Reviewer API
 
-### `npm start`
+## 📦 Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**Frontend**
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+* React (Create React App)
+* Tailwind CSS
+* React Router (for navigation)
+* Axios / Fetch for API requests
+* Prism.js or similar for code highlighting (optional, if included)
 
-### `npm test`
+## 📁 Repository Structure
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+📦 AI-Code-Reviewer-Frontend
+ ┣ 📂 public
+ ┣ 📂 src
+ ┃ ┣ 📂 components      # React UI components
+ ┃ ┣ 📂 pages           # Pages/screens
+ ┃ ┣ 📂 styles          # Tailwind / CSS files
+ ┃ ┣ App.jsx
+ ┃ ┗ index.jsx
+ ┣ .gitignore
+ ┣ package.json
+ ┣ tailwind.config.js
+ ┗ README.md
+```
 
-### `npm run build`
+## 📌 Prerequisites
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Make sure you have:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+* Node.js (v16+ recommended)
+* npm or Yarn
+* A running backend API for code reviews
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🛠 Installation
 
-### `npm run eject`
+1. **Clone the repo**
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+git clone https://github.com/FrostScythe/AI-Code-Reviewer-Frontend.git
+cd AI-Code-Reviewer-Frontend
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2. **Install dependencies**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+npm install
+# or
+yarn install
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+3. **Configure environment**
 
-## Learn More
+Create a `.env` file in the project root (if the app requires API URL configuration):
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+VITE_API_BASE_URL=http://localhost:3000
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+(adjust according to your backend)
 
-### Code Splitting
+## 📡 Development
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Start the frontend in development mode:
 
-### Analyzing the Bundle Size
+```bash
+npm start
+# or
+yarn start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+This launches the app at `http://localhost:3000` (or the configured port) and updates automatically on changes.
 
-### Making a Progressive Web App
+## 📦 Build
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+To create a production build:
 
-### Advanced Configuration
+```bash
+npm run build
+# or
+yarn build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+The output will be in the `build/` directory, ready to be served or deployed.
 
-### Deployment
+## 🔗 API Integration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+This frontend expects a backend that:
 
-### `npm run build` fails to minify
+* Accepts code submissions via POST requests
+* Returns AI-generated review feedback
+* Optionally provides review history and metadata
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Example API call (pseudo):
+
+```js
+await axios.post(`${API_BASE_URL}/review`, {
+  code: selectedCode,
+});
+```
+
+## 📝 Tailwind & Styling
+
+This project uses **Tailwind CSS**. You can modify `tailwind.config.js` to suit your design needs.
+
+## 🖼 Screenshots
+
+*(Add screenshots here showing how the app looks)*
+
+## 🤝 Contribution
+
+Contributions are welcome! To contribute:
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit changes
+4. Push and open a pull request
+
+## 📄 License
+
+This project is licensed under the **GPL-3.0 License**. ([github.com][1])
