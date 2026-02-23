@@ -133,3 +133,7 @@ Contributions are welcome! To contribute:
 ## 📄 License
 
 This project is licensed under the **GPL-3.0 License**. ([github.com][1])
+
+---
+
+For the corresponding backend API service, see the AI-Code-Reviewer-Backend repository: https://github.com/FrostScythe/AI-Code-Reviewer-Backend
