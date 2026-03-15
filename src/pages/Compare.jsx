@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Loader from '../components/Loader';
@@ -7,57 +7,73 @@ import api from '../services/api';
 const Compare = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const submissionId = queryParams.get('id');
+  const submissionId = new URLSearchParams(location.search).get('id');
 
   const [versions, setVersions] = useState([]);
   const [versionA, setVersionA] = useState('');
   const [versionB, setVersionB] = useState('');
-  const [codeA, setCodeA] = useState('');
-  const [codeB, setCodeB] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [comparison, setComparison] = useState(null);
+  const [loadingVersions, setLoadingVersions] = useState(true);
+  const [loadingComparison, setLoadingComparison] = useState(false);
+  const [error, setError] = useState('');
 
-  const loadVersions = useCallback(async () => {
-    try {
-      const data = await api.getVersions(submissionId);
-      setVersions(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [submissionId]);
-
-  const updateComparison = useCallback(async () => {
-    if (versionA && versionB && versionA !== 'Select version A' && versionB !== 'Select version B') {
-      try {
-        const data = await api.compareVersions(versionA, versionB);
-        setCodeA(data.versionA.code);
-        setCodeB(data.versionB.code);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  }, [versionA, versionB]);
-
+  // Load version list on mount
   useEffect(() => {
     if (!submissionId) {
       navigate('/history');
       return;
     }
-    loadVersions();
-  }, [submissionId, navigate, loadVersions]);
+    api.getVersions(submissionId)
+      .then((data) => {
+        setVersions(data);
+        // Pre-select most recent two versions if available
+        if (data.length >= 2) {
+          setVersionA(data[1].id);   // second newest = "original"
+          setVersionB(data[0].id);   // newest = "modified"
+        } else if (data.length === 1) {
+          setVersionA(data[0].id);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setError('Failed to load versions.');
+      })
+      .finally(() => setLoadingVersions(false));
+  }, [submissionId, navigate]);
+
+  // Fetch comparison whenever both selectors have a valid UUID
+  const fetchComparison = useCallback(async () => {
+    // Basic UUID validation — just check they're non-empty and different
+    if (!versionA || !versionB) return;
+    if (versionA === versionB) {
+      setError('Please select two different versions to compare.');
+      return;
+    }
+    setError('');
+    setLoadingComparison(true);
+    try {
+      const data = await api.compareVersions(versionA, versionB);
+      setComparison(data);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load comparison. Please try again.');
+    } finally {
+      setLoadingComparison(false);
+    }
+  }, [versionA, versionB]);
 
   useEffect(() => {
-    updateComparison();
-  }, [updateComparison]);
+    if (versionA && versionB) {
+      fetchComparison();
+    }
+  }, [fetchComparison, versionA, versionB]);
 
-  if (loading) {
+  if (loadingVersions) {
     return (
       <>
         <Header />
         <main className="max-w-6xl mx-auto px-4 py-8">
-          <Loader />
+          <Loader text="Loading versions..." />
         </main>
       </>
     );
@@ -75,48 +91,87 @@ const Compare = () => {
         </div>
 
         <div className="card">
-          <div className="flex gap-4 mb-4">
-            <select
-              className="btn btn-secondary w-48"
-              value={versionA}
-              onChange={(e) => setVersionA(e.target.value)}
+          {/* Version selectors */}
+          <div className="flex flex-wrap gap-4 mb-6 items-center">
+            <div>
+              <label className="block text-muted text-sm mb-1">Original (A)</label>
+              <select
+                className="btn btn-secondary"
+                value={versionA}
+                onChange={(e) => setVersionA(e.target.value)}
+              >
+                <option value="">— select —</option>
+                {versions.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    Version {v.versionNumber}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <span className="text-muted text-xl mt-5">→</span>
+
+            <div>
+              <label className="block text-muted text-sm mb-1">Modified (B)</label>
+              <select
+                className="btn btn-secondary"
+                value={versionB}
+                onChange={(e) => setVersionB(e.target.value)}
+              >
+                <option value="">— select —</option>
+                {versions.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    Version {v.versionNumber}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              className="btn btn-primary mt-5"
+              onClick={fetchComparison}
+              disabled={!versionA || !versionB || loadingComparison}
             >
-              <option value="">Select version A</option>
-              {versions.map((v) => (
-                <option key={v.id} value={v.id}>
-                  Version {v.versionNumber}
-                </option>
-              ))}
-            </select>
-            <div className="flex items-center text-muted"></div>
-            <select
-              className="btn btn-secondary w-48"
-              value={versionB}
-              onChange={(e) => setVersionB(e.target.value)}
-            >
-              <option value="">Select version B</option>
-              {versions.map((v) => (
-                <option key={v.id} value={v.id}>
-                  Version {v.versionNumber}
-                </option>
-              ))}
-            </select>
+              {loadingComparison ? 'Loading…' : 'Compare'}
+            </button>
           </div>
 
-          <div className="diff-view">
-            <div>
-              <h4 className="text-danger mb-2 text-center">Original</h4>
-              <pre className="whitespace-pre-wrap text-xs bg-black/30 p-4 rounded-lg border border-border">
-                {codeA}
-              </pre>
+          {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+
+          {/* Side-by-side diff */}
+          {comparison ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="text-danger mb-2 text-center font-semibold">
+                  Version {comparison.versionA.versionNumber} (Original)
+                </h4>
+                <pre className="whitespace-pre-wrap text-xs bg-black/30 p-4 rounded-lg border border-border overflow-auto max-h-[60vh]">
+                  {comparison.versionA.code}
+                </pre>
+              </div>
+              <div>
+                <h4 className="text-success mb-2 text-center font-semibold">
+                  Version {comparison.versionB.versionNumber} (Modified)
+                </h4>
+                <pre className="whitespace-pre-wrap text-xs bg-black/30 p-4 rounded-lg border border-border overflow-auto max-h-[60vh]">
+                  {comparison.versionB.code}
+                </pre>
+              </div>
             </div>
-            <div>
-              <h4 className="text-success mb-2 text-center">Modified</h4>
-              <pre className="whitespace-pre-wrap text-xs bg-black/30 p-4 rounded-lg border border-border">
-                {codeB}
-              </pre>
+          ) : (
+            !loadingComparison && (
+              <p className="text-muted text-center py-8">
+                Select two versions above to see a side-by-side comparison.
+              </p>
+            )
+          )}
+
+          {loadingComparison && (
+            <div className="text-center py-8">
+              <div className="loader mx-auto mb-4" />
+              <p className="text-muted">Loading comparison…</p>
             </div>
-          </div>
+          )}
         </div>
       </main>
     </>
